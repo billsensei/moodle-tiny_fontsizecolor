@@ -178,7 +178,7 @@ class fontlist {
 
             // Labels are rendered by TinyMCE as plain text, but clean them anyway in case a
             // future renderer changes that assumption. The pipe is the field separator.
-            $label = clean_param(trim($parts[1] ?? ''), PARAM_TEXT);
+            $label = clean_param(trim($parts[1] ?? ''), PARAM_NOTAGS);
             $label = trim(str_replace('|', '', core_text::substr($label, 0, self::MAX_LABEL_LENGTH)));
             if ($label === '') {
                 $label = strtoupper($value);

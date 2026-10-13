@@ -77,6 +77,14 @@ final class fontlist_test extends \advanced_testcase {
     }
 
     /**
+     * Markup in a colour label, including multilang spans, is removed.
+     */
+    public function test_parse_fontcolors_strips_tags_from_label(): void {
+        $colors = fontlist::parse_fontcolors('#ff0000|<span lang="en" class="multilang">Red</span><b>!</b>');
+        $this->assertSame('Red!', $colors[0]['label']);
+    }
+
+    /**
      * The defaults are used until something valid is configured.
      */
     public function test_get_lists_defaults(): void {

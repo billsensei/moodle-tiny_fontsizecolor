@@ -28,16 +28,16 @@ use tiny_fontsizecolor\local\fontlist;
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin = 'tiny_fontsizecolor';
+$component = 'tiny_fontsizecolor';
 
-$settings = new admin_settingpage('tiny_fontsizecolor_settings', new lang_string('settings', $plugin));
+$settings = new admin_settingpage('tiny_fontsizecolor_settings', new lang_string('settings', $component));
 if ($ADMIN->fulltree) {
     // Both lists are validated when saved, and again wherever they are read (see
     // classes/local/fontlist.php), so neither can inject arbitrary CSS into content.
     $settings->add(new setting_fontsizes(
         'tiny_fontsizecolor/fontsizes',
-        get_string('fontsizes', $plugin),
-        get_string('fontsizes_desc', $plugin, [
+        get_string('fontsizes', $component),
+        get_string('fontsizes_desc', $component, [
             'min' => fontlist::MIN_FONTSIZE,
             'max' => fontlist::MAX_FONTSIZE,
         ]),
@@ -46,8 +46,8 @@ if ($ADMIN->fulltree) {
 
     $settings->add(new setting_fontcolors(
         'tiny_fontsizecolor/fontcolors',
-        get_string('fontcolors', $plugin),
-        get_string('fontcolors_desc', $plugin),
+        get_string('fontcolors', $component),
+        get_string('fontcolors_desc', $component),
         fontlist::default_fontcolors_setting()
     ));
 }

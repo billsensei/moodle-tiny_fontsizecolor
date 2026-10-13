@@ -25,6 +25,7 @@ import {getFontColorList, getFontSizeList, getFontSizeMax, getFontSizeMin, getFo
 import {getButtonImage} from 'editor_tiny/utils';
 // The snake_case exports are used because getString/getStrings only exist from Moodle 4.3.
 import {get_string as getString, get_strings as getStrings} from 'core/str';
+import {exception as displayException} from 'core/notification';
 import {
     component,
     fontcolorButtonName,
@@ -174,15 +175,19 @@ const getCurrentFontSize = (editor) => {
  * The text colour of the selection, as a hex colour.
  *
  * @param {TinyMCE.editor} editor The tinyMCE editor instance.
- * @returns {string} e.g. "#ff0000".
+ * @returns {string} e.g. "#ff0000", or an empty string if the colour is transparent or unreadable.
  */
 const getCurrentColor = (editor) => {
     const color = editor.dom.getStyle(editor.selection.getStart(), 'color', true) || '';
     const rgb = color.match(/^rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)/i);
     if (rgb) {
+        // A fully transparent colour (rgba(0, 0, 0, 0)) is not a text colour that can be ticked or edited.
+        if (/^rgba\(.*,\s*0(\.0+)?\s*\)$/i.test(color)) {
+            return '';
+        }
         return '#' + rgb.slice(1, 4).map((c) => Math.min(255, parseInt(c, 10)).toString(16).padStart(2, '0')).join('');
     }
-    return parseColor(color) || FALLBACK_COLOR;
+    return parseColor(color) || '';
 };
 
 /**
@@ -243,7 +248,7 @@ const openCustomColorDialog = (editor, strings) => {
             {type: 'cancel', name: 'cancel', text: strings.cancel},
             {type: 'submit', name: 'save', text: strings.save, primary: true},
         ],
-        initialData: {colorpicker: getCurrentColor(editor)},
+        initialData: {colorpicker: getCurrentColor(editor) || FALLBACK_COLOR},
         onSubmit: (api) => {
             const color = parseColor(api.getData().colorpicker);
             if (color === null) {
@@ -325,7 +330,8 @@ export const getSetup = async() => {
         ]);
         const buttonStrings = {cancel: cancelText, save: saveText};
         const openSizeDialog = () => rangeStrings.then(([customSizeLabel, customSizeInvalid]) =>
-            openCustomSizeDialog(editor, {...buttonStrings, customSizeTitle, customSizeLabel, customSizeInvalid}));
+            openCustomSizeDialog(editor, {...buttonStrings, customSizeTitle, customSizeLabel, customSizeInvalid}))
+            .catch(displayException);
         const openColorDialog = () => openCustomColorDialog(editor, {...buttonStrings, customColorTitle});
 
         editor.on('PreInit', () => {
