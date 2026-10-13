@@ -19,6 +19,7 @@
  *
  * @package     tiny_fontsizecolor
  * @copyright   2026 billsensei <wrwjpn@gmail.com>
+ * @copyright   2025 Mikko Haiku <mikko.haiku@iki.fi>
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 

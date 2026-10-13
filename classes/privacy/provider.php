@@ -22,6 +22,7 @@ namespace tiny_fontsizecolor\privacy;
  * @package     tiny_fontsizecolor
  * @category    privacy
  * @copyright   2026 billsensei <wrwjpn@gmail.com>
+ * @copyright   2023 Mikko Haiku <mikko.haiku@mediamaisteri.com>
  * @license     https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class provider implements \core_privacy\local\metadata\null_provider {

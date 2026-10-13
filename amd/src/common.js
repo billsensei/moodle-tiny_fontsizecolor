@@ -18,6 +18,7 @@
  *
  * @module      tiny_fontsizecolor/common
  * @copyright   2026 billsensei <wrwjpn@gmail.com>
+ * @copyright   2023 Mikko Haiku <mikko.haiku@mediamaisteri.com>
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 

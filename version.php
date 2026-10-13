@@ -25,8 +25,8 @@
 defined('MOODLE_INTERNAL') || die();
 
 $plugin->component = 'tiny_fontsizecolor';
-$plugin->release = '1.2.1';
+$plugin->release = '1.2.2';
 $plugin->maturity = MATURITY_STABLE;
 $plugin->requires = 2022112800;
 $plugin->supported = [501, 503];
-$plugin->version = 2026101300;
+$plugin->version = 2026101301;
