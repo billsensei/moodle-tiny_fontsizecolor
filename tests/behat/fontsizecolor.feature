@@ -33,7 +33,7 @@ Feature: Change the font size and colour in TinyMCE
   @javascript
   Scenario: Apply a custom font size
     When I click on the "Font size" button for the "Description" TinyMCE editor
-    And I click on "Custom size..." "menuitem"
+    And I click on "//*[@role='menuitem'][contains(normalize-space(.), 'Custom size')]" "xpath_element"
     And I set the field "Font size in points (6 to 72)" to "30"
     And I click on "Save changes" "button" in the ".tox-dialog" "css_element"
     Then the field "Description" matches value "<p><span style=\"font-size: 30pt;\">Hello</span></p>"
@@ -41,7 +41,7 @@ Feature: Change the font size and colour in TinyMCE
   @javascript
   Scenario: A custom font size outside the range is refused
     When I click on the "Font size" button for the "Description" TinyMCE editor
-    And I click on "Custom size..." "menuitem"
+    And I click on "//*[@role='menuitem'][contains(normalize-space(.), 'Custom size')]" "xpath_element"
     And I set the field "Font size in points (6 to 72)" to "99"
     And I click on "Save changes" "button" in the ".tox-dialog" "css_element"
     Then I should see "Enter a whole number between 6 and 72."
