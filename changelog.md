@@ -2,6 +2,10 @@
 
 All notable changes to `tiny_fontsizecolor`, newest first. Add an entry here with every new version. `CHANGES.md` holds only the latest version.
 
+## 1.2.4
+
+- Added `composer.json` (package `billsensei/moodle-tiny_fontsizecolor`, type `moodle-tiny`) so the plugin can be installed with Composer from Packagist, and a README section on it, including the `public/` path needed on Moodle 5.1 and later. No code changes.
+
 ## 1.2.3
 
 - Fixed the colour list editor in the admin settings: a new colour row with a label but no colour was saved as `|Label` and rejected with an "invalid entries" error. Such a row is now ignored, like an empty size row.

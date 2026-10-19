@@ -32,20 +32,13 @@ Then visit *Site administration &raquo; Notifications* to complete the installat
 
 ### Installing with Composer
 
-The package is `billsensei/moodle-tiny_fontsizecolor` (type `moodle-tiny`). It is not on Packagist, so add the repository to your site's `composer.json`:
+The package is `billsensei/moodle-tiny_fontsizecolor` (type `moodle-tiny`), published on [Packagist](https://packagist.org/packages/billsensei/moodle-tiny_fontsizecolor):
 
-```json
-{
-    "repositories": [
-        {"type": "vcs", "url": "https://github.com/billsensei/tiny_fontsizecolor"}
-    ],
-    "require": {
-        "billsensei/moodle-tiny_fontsizecolor": "^1.2"
-    }
-}
+```
+composer require billsensei/moodle-tiny_fontsizecolor
 ```
 
-`composer/installers` puts the plugin in `lib/editor/tiny/plugins/fontsizecolor`. That is the right place for Moodle 5.0 and earlier, but **not for Moodle 5.1 and later**, where the web root is `public/` and `composer/installers` (2.3.0) has no `public/` path. On those versions, set the path yourself in the site's `composer.json`, before running `composer install`:
+`composer/installers` puts the plugin in `lib/editor/tiny/plugins/fontsizecolor`. That is the right place for Moodle 5.0 and earlier, but **not for Moodle 5.1 and later**, where the web root is `public/` and `composer/installers` (2.3.0) has no `public/` path. On those versions, set the path yourself in the site's `composer.json`, before running `composer require`:
 
 ```json
 {
@@ -135,6 +128,7 @@ This plugin is a fork of [moodle-tiny_fontsize](https://github.com/finspire-fi/m
 
 ## Changelog
 
+- **1.2.4** - Added `composer.json` (package `billsensei/moodle-tiny_fontsizecolor`, type `moodle-tiny`) so the plugin can be installed with Composer from Packagist, and a README section on it, including the `public/` path needed on Moodle 5.1 and later. No code changes.
 - **1.2.3** - Fixed the colour list editor in the admin settings: a new colour row with a label but no colour was saved as `|Label` and rejected with an "invalid entries" error. Such a row is now ignored, like an empty size row.
 - **1.2.2** - Credited the original author, Mikko Haiku, in the file headers and the README. No code changes.
 - **1.2.1** - Declared support for Moodle 5.1 to 5.3 and added GitHub CI. Font labels now strip tags (`PARAM_NOTAGS`). Clearer capability name. Rebuilt the AMD module, which was stale.
