@@ -155,8 +155,13 @@ const buildColorRow = (line) => {
     return {
         elements: [picker, hex, text],
         serialise: () => {
+            const hexValue = hex.value.trim();
             const labelValue = text.value.replace(/\|/g, '').trim();
-            return labelValue === '' ? hex.value.trim() : `${hex.value.trim()}|${labelValue}`;
+            if (hexValue === '') {
+                // A row without a colour is ignored, like an empty size row, rather than saved as "|Label".
+                return '';
+            }
+            return labelValue === '' ? hexValue : `${hexValue}|${labelValue}`;
         },
         setLabels: (strings, row) => {
             picker.setAttribute('aria-label', strings.colorpicker.replace(ROW, row));

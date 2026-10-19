@@ -2,6 +2,6 @@
 
 What changed or was added since the previous version of `tiny_fontsizecolor`. The full history is in [changelog.md](changelog.md).
 
-## 1.2.2
+## 1.2.3
 
-- Credited the original author, Mikko Haiku, in the file headers and the README. No code changes.
+- Fixed the colour list editor in the admin settings: a new colour row with a label but no colour was saved as `|Label` and rejected with an "invalid entries" error. Such a row is now ignored, like an empty size row.
