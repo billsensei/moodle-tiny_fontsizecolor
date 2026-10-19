@@ -30,6 +30,33 @@ lib/editor/tiny/plugins/fontsizecolor
 
 Then visit *Site administration &raquo; Notifications* to complete the installation. The new buttons appear in every TinyMCE editor on the site, in the *formatting* toolbar group and in the *Format* menu.
 
+### Installing with Composer
+
+The package is `billsensei/moodle-tiny_fontsizecolor` (type `moodle-tiny`). It is not on Packagist, so add the repository to your site's `composer.json`:
+
+```json
+{
+    "repositories": [
+        {"type": "vcs", "url": "https://github.com/billsensei/tiny_fontsizecolor"}
+    ],
+    "require": {
+        "billsensei/moodle-tiny_fontsizecolor": "^1.2"
+    }
+}
+```
+
+`composer/installers` puts the plugin in `lib/editor/tiny/plugins/fontsizecolor`. That is the right place for Moodle 5.0 and earlier, but **not for Moodle 5.1 and later**, where the web root is `public/` and `composer/installers` (2.3.0) has no `public/` path. On those versions, set the path yourself in the site's `composer.json`, before running `composer install`:
+
+```json
+{
+    "extra": {
+        "installer-paths": {
+            "public/lib/editor/tiny/plugins/fontsizecolor": ["billsensei/moodle-tiny_fontsizecolor"]
+        }
+    }
+}
+```
+
 ## Using the plugin
 
 1. Select some text in the editor.
