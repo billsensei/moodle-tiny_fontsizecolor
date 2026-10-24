@@ -1,0 +1,43 @@
+name: Attach release zip
+
+# Builds the installable zip (single root folder "fontsizecolor", as Moodle's
+# plugin installer requires) and attaches it to the GitHub release for the tag.
+# GitHub's own "Source code" archives and branch downloads have a different
+# root folder and are rejected by Moodle ("rootinvalid").
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Existing tag to build the zip for (e.g. v1.2.5)'
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  zip:
+    runs-on: ubuntu-latest
+    env:
+      TAG: ${{ inputs.tag || github.ref_name }}
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.TAG }}
+
+      - name: Build zip
+        run: |
+          git archive --format=zip --prefix=fontsizecolor/ -o "tiny_fontsizecolor_${TAG#[vV]}.zip" "$TAG"
+          # Fail if the archive has more than one root folder or the wrong one.
+          roots=$(unzip -Z1 "tiny_fontsizecolor_${TAG#[vV]}.zip" | cut -d/ -f1 | sort -u)
+          test "$roots" = "fontsizecolor"
+          unzip -p "tiny_fontsizecolor_${TAG#[vV]}.zip" fontsizecolor/version.php | grep -q "tiny_fontsizecolor"
+
+      - name: Attach to release
+        run: |
+          gh release view "$TAG" >/dev/null 2>&1 || gh release create "$TAG" --title "$TAG" --generate-notes
+          gh release upload "$TAG" "tiny_fontsizecolor_${TAG#[vV]}.zip" --clobber

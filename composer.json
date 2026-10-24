@@ -3,10 +3,10 @@
     "description": "TinyMCE plugin for Moodle that adds font size and font colour buttons and menu items, with admin-configurable lists.",
     "type": "moodle-tiny",
     "license": "GPL-3.0-or-later",
-    "homepage": "https://github.com/billsensei/tiny_fontsizecolor",
+    "homepage": "https://github.com/billsensei/moodle-tiny_fontsizecolor",
     "support": {
-        "issues": "https://github.com/billsensei/tiny_fontsizecolor/issues",
-        "source": "https://github.com/billsensei/tiny_fontsizecolor"
+        "issues": "https://github.com/billsensei/moodle-tiny_fontsizecolor/issues",
+        "source": "https://github.com/billsensei/moodle-tiny_fontsizecolor"
     },
     "require": {
         "php": ">=8.2",

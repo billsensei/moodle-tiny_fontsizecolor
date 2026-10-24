@@ -15,12 +15,14 @@ A [TinyMCE](https://www.tiny.cloud/) editor plugin for Moodle that adds a font s
 
 ## Requirements
 
-- Moodle 4.1 (2022112800) or later
-- The TinyMCE editor (`editor_tiny`), which is the default editor in Moodle 4.1 and later
+- Moodle 5.1 (2025100600) or later; tested on Moodle 5.1 to 5.3
+- The TinyMCE editor (`editor_tiny`), which is the default editor
 
 ## Installation
 
-Copy (or clone) this repository into your Moodle installation at:
+**Uploading a zip:** use the zip attached to each [release](https://github.com/billsensei/moodle-tiny_fontsizecolor/releases) (`tiny_fontsizecolor_<version>.zip`). Its single top-level folder is `fontsizecolor`, which is what Moodle's plugin installer requires. Do **not** use GitHub's *Download ZIP* button, a branch download or the *Source code (zip)* link: their top-level folder is named after the repository, and Moodle rejects them with "rootinvalid". If you only have such an archive, unzip it and rename the folder to `fontsizecolor` before installing.
+
+**Copying files:** copy (or clone) this repository into your Moodle installation at:
 
 ```
 lib/editor/tiny/plugins/fontsizecolor
@@ -128,6 +130,7 @@ This plugin is a fork of [moodle-tiny_fontsize](https://github.com/finspire-fi/m
 
 ## Changelog
 
+- **1.2.5** - Release zip built by GitHub Actions with the single root folder `fontsizecolor`, README install note on which zip to use. `requires` set to Moodle 5.1 (2025100600) to match `supported` [501, 503] and the README. `composer.json` URLs use the renamed repository.
 - **1.2.4** - Added `composer.json` (package `billsensei/moodle-tiny_fontsizecolor`, type `moodle-tiny`) so the plugin can be installed with Composer from Packagist, and a README section on it, including the `public/` path needed on Moodle 5.1 and later. No code changes.
 - **1.2.3** - Fixed the colour list editor in the admin settings: a new colour row with a label but no colour was saved as `|Label` and rejected with an "invalid entries" error. Such a row is now ignored, like an empty size row.
 - **1.2.2** - Credited the original author, Mikko Haiku, in the file headers and the README. No code changes.
