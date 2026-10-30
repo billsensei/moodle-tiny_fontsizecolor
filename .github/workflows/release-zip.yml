@@ -37,6 +37,9 @@ jobs:
           test "$roots" = "fontsizecolor"
           unzip -p "tiny_fontsizecolor_${TAG#[vV]}.zip" fontsizecolor/version.php | grep -q "tiny_fontsizecolor"
 
+      - name: Check the zip like Moodle's installer
+        run: scripts/check-zip.sh "tiny_fontsizecolor_${TAG#[vV]}.zip" fontsizecolor tiny_fontsizecolor
+
       - name: Attach to release
         run: |
           gh release view "$TAG" >/dev/null 2>&1 || gh release create "$TAG" --title "$TAG" --generate-notes
