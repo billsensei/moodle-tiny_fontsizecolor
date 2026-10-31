@@ -2,6 +2,10 @@
 
 What changed or was added since the previous version of `tiny_fontsizecolor`. The full history is in [changelog.md](changelog.md).
 
+## Unreleased
+
+- Release: a GitHub Actions workflow (`moodle-release.yml`) sends each pushed `v*` tag to the Moodle plugins directory. It needs the repository secret `MOODLE_MARKETPLACE_TOKEN`.
+
 ## 1.2.5
 
 - Minimum Moodle version: `$plugin->requires` is now 2025100600 (Moodle 5.1), matching `$plugin->supported = [501, 503]`, the marketplace listing and the README (it said Moodle 4.1 before). Moodle 4.1 to 5.0 are no longer declared as supported.
