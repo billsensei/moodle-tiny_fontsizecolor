@@ -4,7 +4,7 @@ All notable changes to `tiny_fontsizecolor`, newest first. Add an entry here wit
 
 ## Unreleased
 
-- Release: a GitHub Actions workflow (`moodle-release.yml`) sends each pushed `v*` tag to the Moodle plugins directory. It needs the repository secret `MOODLE_MARKETPLACE_TOKEN`.
+- Release: a GitHub Actions workflow (`moodle-release.yml`) sends each pushed `v*` tag to the Moodle plugins directory. It needs the repository secret `MARKETPLACE_TOKEN`.
 
 ## 1.2.5
 
