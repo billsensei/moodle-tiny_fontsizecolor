@@ -4,6 +4,10 @@ What changed or was added since the previous version of `tiny_fontsizecolor`. Th
 
 ## Unreleased
 
+Marketplace summary: Release workflow now sends a one-line summary, because the Marketplace keeps only 128 characters of the notes.
+
+- Release. The Moodle Marketplace keeps only the first 128 characters of the release notes, so a long entry was shown cut off. `moodle-release.yml` now sends the one line of `CHANGES.md` that starts with `Marketplace summary: ` (at most 128 characters) and stops with an error if it is missing or too long. Add that line with every version.
+
 - Release: a GitHub Actions workflow (`moodle-release.yml`) sends each pushed `v*` tag to the Moodle plugins directory. It needs the repository secret `MARKETPLACE_TOKEN`.
 
 ## 1.2.5
