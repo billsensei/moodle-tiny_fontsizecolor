@@ -43,15 +43,18 @@ final class plugininfo_test extends \advanced_testcase {
         $this->resetAfterTest();
         unset_config('fontsizes', 'tiny_fontsizecolor');
         unset_config('fontcolors', 'tiny_fontsizecolor');
+        unset_config('fontfamilies', 'tiny_fontsizecolor');
 
         $config = plugininfo::get_plugin_configuration_for_context(\context_system::instance(), [], []);
 
         $this->assertSame([8, 9, 10, 11, 12], $config['fontsizes']);
         $this->assertSame('pt', $config['fontsizeunit']);
         $this->assertSame(6, $config['fontsizemin']);
-        $this->assertSame(72, $config['fontsizemax']);
+        $this->assertSame(200, $config['fontsizemax']);
         $this->assertCount(7, $config['fontcolors']);
         $this->assertSame('#000000', $config['fontcolors'][0]['value']);
+        $this->assertCount(8, $config['fontfamilies']);
+        $this->assertSame('Arial, Helvetica, sans-serif', $config['fontfamilies'][0]['value']);
     }
 
     /**
@@ -61,11 +64,13 @@ final class plugininfo_test extends \advanced_testcase {
         $this->resetAfterTest();
         set_config('fontsizes', "20\n14\nabc\n500", 'tiny_fontsizecolor');
         set_config('fontcolors', "#F00|Alarm\nred; background:url(x)|Bad", 'tiny_fontsizecolor');
+        set_config('fontfamilies', "Mono|Courier New, monospace\nBad|Arial; color:red", 'tiny_fontsizecolor');
 
         $config = plugininfo::get_plugin_configuration_for_context(\context_system::instance(), [], []);
 
         $this->assertSame([14, 20], $config['fontsizes']);
         $this->assertSame([['value' => '#ff0000', 'label' => 'Alarm']], $config['fontcolors']);
+        $this->assertSame([['value' => "'Courier New', monospace", 'label' => 'Mono']], $config['fontfamilies']);
     }
 
     /**

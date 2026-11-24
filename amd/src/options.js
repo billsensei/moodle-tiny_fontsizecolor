@@ -30,6 +30,7 @@ const fontsizeunit = getPluginOptionName(pluginName, 'fontsizeunit');
 const fontsizemin = getPluginOptionName(pluginName, 'fontsizemin');
 const fontsizemax = getPluginOptionName(pluginName, 'fontsizemax');
 const fontcolors = getPluginOptionName(pluginName, 'fontcolors');
+const fontfamilies = getPluginOptionName(pluginName, 'fontfamilies');
 
 /**
  * Register the options for the Tiny Font size and colour plugin.
@@ -55,10 +56,15 @@ export const register = (editor) => {
 
     editor.options.register(fontsizemax, {
         processor: 'number',
-        "default": 72,
+        "default": 200,
     });
 
     editor.options.register(fontcolors, {
+        processor: 'array',
+        "default": [],
+    });
+
+    editor.options.register(fontfamilies, {
         processor: 'array',
         "default": [],
     });
@@ -104,3 +110,11 @@ export const getFontSizeMax = (editor) => editor.options.get(fontsizemax);
  * @returns {Array} Array of {value, label} objects.
  */
 export const getFontColorList = (editor) => editor.options.get(fontcolors);
+
+/**
+ * Get the list of font families.
+ *
+ * @param {TinyMCE.editor} editor
+ * @returns {Array} Array of {value, label} objects, where value is a CSS font stack.
+ */
+export const getFontFamilyList = (editor) => editor.options.get(fontfamilies);

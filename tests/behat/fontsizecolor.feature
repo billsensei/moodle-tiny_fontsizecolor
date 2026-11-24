@@ -12,6 +12,7 @@ Feature: Change the font size and colour in TinyMCE
   Scenario: The toolbar has the font size and font colour buttons
     Then "Font size" button should exist in the "Description" TinyMCE editor
     And "Font colour" button should exist in the "Description" TinyMCE editor
+    And "Font family" button should exist in the "Description" TinyMCE editor
 
   @javascript
   Scenario: Apply a font size from the toolbar and see it ticked
@@ -34,17 +35,17 @@ Feature: Change the font size and colour in TinyMCE
   Scenario: Apply a custom font size
     When I click on the "Font size" button for the "Description" TinyMCE editor
     And I click on "//*[@role='menuitem'][contains(normalize-space(.), 'Custom size')]" "xpath_element"
-    And I set the field "Font size in points (6 to 72)" to "30"
+    And I set the field "Font size in points (6 to 200)" to "150"
     And I click on "Save changes" "button" in the ".tox-dialog" "css_element"
-    Then the field "Description" matches value "<p><span style=\"font-size: 30pt;\">Hello</span></p>"
+    Then the field "Description" matches value "<p><span style=\"font-size: 150pt;\">Hello</span></p>"
 
   @javascript
   Scenario: A custom font size outside the range is refused
     When I click on the "Font size" button for the "Description" TinyMCE editor
     And I click on "//*[@role='menuitem'][contains(normalize-space(.), 'Custom size')]" "xpath_element"
-    And I set the field "Font size in points (6 to 72)" to "99"
+    And I set the field "Font size in points (6 to 200)" to "201"
     And I click on "Save changes" "button" in the ".tox-dialog" "css_element"
-    Then I should see "Enter a whole number between 6 and 72."
+    Then I should see "Enter a whole number between 6 and 200."
     And the field "Description" matches value "<p>Hello</p>"
 
   @javascript
@@ -53,4 +54,14 @@ Feature: Change the font size and colour in TinyMCE
     Then the field "Description" matches value "<p><span style=\"color: #e03e2d;\">Hello</span></p>"
     And I click on the "Font colour" button for the "Description" TinyMCE editor
     And I click on "Remove colour" "menuitem"
+    And the field "Description" matches value "<p>Hello</p>"
+
+  @javascript
+  Scenario: Apply a font family from the toolbar, see it ticked and return to the default font
+    When I click on the "Font family" button for the "Description" TinyMCE editor
+    And I click on "//*[@role='menuitemcheckbox'][@aria-label='Georgia']" "xpath_element"
+    Then the field "Description" matches value "<p><span style=\"font-family: Georgia, serif;\">Hello</span></p>"
+    And I click on the "Font family" button for the "Description" TinyMCE editor
+    And "//*[@role='menuitemcheckbox'][@aria-label='Georgia'][@aria-checked='true']" "xpath_element" should exist
+    And I click on "Default font" "menuitem"
     And the field "Description" matches value "<p>Hello</p>"

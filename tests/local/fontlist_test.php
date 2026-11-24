@@ -33,10 +33,10 @@ final class fontlist_test extends \advanced_testcase {
      */
     public function test_parse_fontsizes(): void {
         $invalid = [];
-        $sizes = fontlist::parse_fontsizes("12\r\n 9 \n\n8\n12\n5\n73\n72\n6\n10.5\n-8\n1e1\n<b>9</b>", $invalid);
+        $sizes = fontlist::parse_fontsizes("12\r\n 9 \n\n8\n12\n5\n201\n200\n6\n10.5\n-8\n1e1\n<b>9</b>", $invalid);
 
-        $this->assertSame([6, 8, 9, 12, 72], $sizes);
-        $this->assertSame(['5', '73', '10.5', '-8', '1e1', '<b>9</b>'], $invalid);
+        $this->assertSame([6, 8, 9, 12, 200], $sizes);
+        $this->assertSame(['5', '201', '10.5', '-8', '1e1', '<b>9</b>'], $invalid);
     }
 
     /**
@@ -66,6 +66,66 @@ final class fontlist_test extends \advanced_testcase {
         ], $colors);
         $this->assertSame(['red|Red', '#ff0000;background:url(x)|Bad', 'expression(alert(1))', '#12345|Bad'], $invalid);
         $this->assertSame(['#ff0000|Scarlet', '#00FF00|Lime'], $duplicates);
+    }
+
+    /**
+     * Font stacks are plain font names; they are normalised, and anything that is not a font name is refused.
+     */
+    public function test_parse_fontstack(): void {
+        $this->assertSame("Arial, Helvetica, sans-serif", fontlist::parse_fontstack('Arial,Helvetica , SANS-SERIF'));
+        $this->assertSame("'Times New Roman', Times, serif", fontlist::parse_fontstack('"Times  New Roman", \'Times\', serif'));
+        $this->assertSame("'Noto Sans 2'", fontlist::parse_fontstack('Noto Sans 2'));
+        $this->assertSame("'メイリオ', sans-serif", fontlist::parse_fontstack('メイリオ, sans-serif'));
+
+        foreach (
+            ['', ',', 'Arial,', 'Arial; color:red', 'url(x)', 'a{b}', "Arial\\", '<b>x</b>', "Ar'ial", '-Arial',
+                'a,b,c,d,e,f,g,h,i,j,k', str_repeat('x', 51)] as $bad
+        ) {
+            $this->assertNull(fontlist::parse_fontstack($bad), $bad);
+        }
+    }
+
+    /**
+     * Font families: labels are cleaned, a bare stack is labelled by its first font, duplicates keep the first.
+     */
+    public function test_parse_fontfamilies(): void {
+        $invalid = [];
+        $duplicates = [];
+        $families = fontlist::parse_fontfamilies(implode("\n", [
+            'Arial|Arial, Helvetica, sans-serif',
+            "Georgia, 'Times New Roman'",
+            '<b>Mono</b>|monospace',
+            'Bad|Arial; background:url(x)',
+            'Nothing|',
+            'Again|arial, helvetica, SANS-SERIF',
+        ]), $invalid, $duplicates);
+
+        $this->assertSame([
+            ['value' => 'Arial, Helvetica, sans-serif', 'label' => 'Arial'],
+            ['value' => "Georgia, 'Times New Roman'", 'label' => 'Georgia'],
+            ['value' => 'monospace', 'label' => 'Mono'],
+        ], $families);
+        $this->assertSame(['Bad|Arial; background:url(x)', 'Nothing|'], $invalid);
+        $this->assertSame(['Again|arial, helvetica, SANS-SERIF'], $duplicates);
+    }
+
+    /**
+     * The default font list is valid, round-trips unchanged, and is used when nothing is saved.
+     */
+    public function test_default_fontfamilies(): void {
+        $this->resetAfterTest();
+        $invalid = [];
+        $duplicates = [];
+        $default = fontlist::default_fontfamilies_setting();
+        $families = fontlist::parse_fontfamilies($default, $invalid, $duplicates);
+
+        $this->assertSame([], $invalid);
+        $this->assertSame([], $duplicates);
+        $this->assertCount(8, $families);
+        $this->assertSame($default, fontlist::format_fontfamilies($families));
+
+        unset_config('fontfamilies', 'tiny_fontsizecolor');
+        $this->assertSame($families, fontlist::get_fontfamilies());
     }
 
     /**

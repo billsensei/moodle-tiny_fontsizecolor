@@ -75,7 +75,9 @@ const create = (tag, className, attributes = {}) => {
  * @returns {Promise<object>}
  */
 const loadStrings = async() => {
-    const keys = ['addsize', 'addcolor', 'fontsize', 'colorpicker', 'colorhex', 'colorlabel', 'remove'];
+    const keys = [
+        'addsize', 'addcolor', 'addfont', 'fontsize', 'colorpicker', 'colorhex', 'colorlabel', 'fontlabel', 'fontstack', 'remove',
+    ];
     const values = await getStrings(keys.map((key) => ({key, component, param: ROW})));
     return Object.fromEntries(keys.map((key, index) => [key, values[index]]));
 };
@@ -172,10 +174,53 @@ const buildColorRow = (line) => {
 };
 
 /**
+ * Build the inputs for one font family row.
+ *
+ * @param {string} line The stored line, e.g. "Arial|Arial, Helvetica, sans-serif".
+ * @returns {object} The row inputs, a serialiser, and the accessible label setters.
+ */
+const buildFontRow = (line) => {
+    const separator = line.indexOf('|');
+    const label = separator === -1 ? '' : line.slice(0, separator).trim();
+    const stack = (separator === -1 ? line : line.slice(separator + 1)).trim();
+
+    const text = create('input', 'form-control d-inline-block w-auto mr-2 me-2', {
+        type: 'text',
+        size: '16',
+        maxlength: String(MAX_LABEL_LENGTH),
+    });
+    text.value = label;
+
+    const names = create('input', 'form-control d-inline-block w-auto mr-2 me-2', {
+        type: 'text',
+        size: '44',
+        spellcheck: 'false',
+    });
+    names.value = stack;
+
+    return {
+        elements: [text, names],
+        serialise: () => {
+            const stackValue = names.value.trim();
+            const labelValue = text.value.replace(/\|/g, '').trim();
+            if (stackValue === '') {
+                // A row without any font names is ignored, like an empty size row.
+                return '';
+            }
+            return labelValue === '' ? stackValue : `${labelValue}|${stackValue}`;
+        },
+        setLabels: (strings, row) => {
+            text.setAttribute('aria-label', strings.fontlabel.replace(ROW, row));
+            names.setAttribute('aria-label', strings.fontstack.replace(ROW, row));
+        },
+    };
+};
+
+/**
  * Replace a list setting's textarea with a row editor.
  *
  * @param {string} textareaId The id of the setting's textarea.
- * @param {string} type Either 'sizes' or 'colors'.
+ * @param {string} type One of 'sizes', 'colors' or 'fonts'.
  * @param {number} min Smallest allowed font size.
  * @param {number} max Largest allowed font size.
  */
@@ -193,7 +238,7 @@ export const init = async(textareaId, type, min, max) => {
     const rows = [];
 
     const addButton = create('button', 'btn btn-secondary', {type: 'button'});
-    addButton.textContent = type === 'colors' ? strings.addcolor : strings.addsize;
+    addButton.textContent = {colors: strings.addcolor, fonts: strings.addfont}[type] ?? strings.addsize;
 
     // Accessible labels include the row number, so refresh them whenever rows change.
     const relabel = () => rows.forEach((row, index) => {
@@ -209,7 +254,7 @@ export const init = async(textareaId, type, min, max) => {
     };
 
     const addRow = (line, focus = false) => {
-        const row = type === 'colors' ? buildColorRow(line) : buildSizeRow(line, {min, max});
+        const row = {colors: buildColorRow, fonts: buildFontRow}[type]?.(line) ?? buildSizeRow(line, {min, max});
         const item = create('li', 'd-flex flex-wrap align-items-center mb-2');
         row.removeButton = create('button', 'btn btn-secondary', {type: 'button'});
         row.removeButton.textContent = removeText;

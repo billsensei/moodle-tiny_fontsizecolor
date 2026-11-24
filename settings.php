@@ -24,6 +24,7 @@
  */
 
 use tiny_fontsizecolor\admin\setting_fontcolors;
+use tiny_fontsizecolor\admin\setting_fontfamilies;
 use tiny_fontsizecolor\admin\setting_fontsizes;
 use tiny_fontsizecolor\local\fontlist;
 
@@ -50,5 +51,12 @@ if ($ADMIN->fulltree) {
         get_string('fontcolors', $component),
         get_string('fontcolors_desc', $component),
         fontlist::default_fontcolors_setting()
+    ));
+
+    $settings->add(new setting_fontfamilies(
+        'tiny_fontsizecolor/fontfamilies',
+        get_string('fontfamilies', $component),
+        get_string('fontfamilies_desc', $component, fontlist::MAX_FONTSTACK_NAMES),
+        fontlist::default_fontfamilies_setting()
     ));
 }

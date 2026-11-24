@@ -29,8 +29,11 @@ export default {
     pluginName: `${component}/plugin`,
     fontsizeIcon: 'fontsize',
     fontcolorIcon: 'fontcolor',
+    fontfamilyIcon: 'fontfamily',
     fontsizeButtonName: `${component}_fontsize`,
     fontsizeMenuItemName: `${component}_fontsize`,
     fontcolorButtonName: `${component}_fontcolor`,
     fontcolorMenuItemName: `${component}_fontcolor`,
+    fontfamilyButtonName: `${component}_fontfamily`,
+    fontfamilyMenuItemName: `${component}_fontfamily`,
 };

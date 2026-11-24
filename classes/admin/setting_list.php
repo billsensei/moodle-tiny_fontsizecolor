@@ -50,7 +50,7 @@ abstract class setting_list extends \admin_setting_configtextarea {
     /**
      * The list type understood by the admin_listeditor JavaScript module.
      *
-     * @return string Either 'sizes' or 'colors'.
+     * @return string One of 'sizes', 'colors' or 'fonts'.
      */
     abstract protected function get_list_type(): string;
 

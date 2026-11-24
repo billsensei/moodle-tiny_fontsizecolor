@@ -29,6 +29,7 @@ use PHPUnit\Framework\Attributes\CoversClass;
 #[CoversClass(setting_list::class)]
 #[CoversClass(setting_fontsizes::class)]
 #[CoversClass(setting_fontcolors::class)]
+#[CoversClass(setting_fontfamilies::class)]
 final class setting_list_test extends \advanced_testcase {
     /**
      * Valid sizes are stored sorted and de-duplicated; an empty list or any invalid line rejects the save.
@@ -43,8 +44,8 @@ final class setting_list_test extends \advanced_testcase {
         $this->assertSame(get_string('error_empty', 'tiny_fontsizecolor'), $setting->write_setting(" \n\n"));
         $this->assertSame("9\n14", get_config('tiny_fontsizecolor', 'fontsizes'));
 
-        $error = $setting->write_setting("10\n200\nbig");
-        $this->assertStringContainsString('200, big', $error);
+        $error = $setting->write_setting("10\n201\nbig");
+        $this->assertStringContainsString('201, big', $error);
         $this->assertSame("9\n14", get_config('tiny_fontsizecolor', 'fontsizes'));
     }
 
@@ -65,5 +66,24 @@ final class setting_list_test extends \advanced_testcase {
         $error = $setting->write_setting("#fff\nurl(evil)|x");
         $this->assertStringContainsString('url(evil)|x', $error);
         $this->assertSame("#aabbcc|Grey\n#ff0000|#FF0000", get_config('tiny_fontsizecolor', 'fontcolors'));
+    }
+
+    /**
+     * Valid font families are stored normalised; any invalid or duplicate line rejects the save.
+     */
+    public function test_fontfamilies_write_setting(): void {
+        $this->resetAfterTest();
+        $setting = new setting_fontfamilies('tiny_fontsizecolor/fontfamilies', 'Fonts', '', 'Arial|Arial');
+
+        $this->assertSame('', $setting->write_setting("Times|Times New Roman,serif\nMono|monospace"));
+        $this->assertSame("Times|'Times New Roman', serif\nMono|monospace", get_config('tiny_fontsizecolor', 'fontfamilies'));
+
+        $error = $setting->write_setting("A|Arial\nB|arial");
+        $this->assertSame(get_string('error_duplicates', 'tiny_fontsizecolor', 'B|arial'), $error);
+
+        $error = $setting->write_setting("A|Arial; background:url(x)");
+        $this->assertStringContainsString('url(x)', $error);
+        $this->assertSame(get_string('error_empty', 'tiny_fontsizecolor'), $setting->write_setting(''));
+        $this->assertSame("Times|'Times New Roman', serif\nMono|monospace", get_config('tiny_fontsizecolor', 'fontfamilies'));
     }
 }

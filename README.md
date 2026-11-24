@@ -1,16 +1,17 @@
 # moodle-tiny_fontsizecolor
 
-A [TinyMCE](https://www.tiny.cloud/) editor plugin for Moodle that adds a font size picker and a font colour picker to the toolbar and Format menu, letting users change the size and colour of selected text.
+A [TinyMCE](https://www.tiny.cloud/) editor plugin for Moodle that adds a font size picker, a font colour picker and a font family picker to the toolbar and Format menu, letting users change the size, colour and font of selected text.
 
 ## Features
 
-- Toolbar buttons and Format menu entries for choosing a font size and a font colour
-- Font sizes are whole points between 6pt and 72pt. By default the picker offers 8, 9, 10, 11 and 12pt; administrators can edit, add or remove sizes
+- Toolbar buttons and Format menu entries for choosing a font size, a font colour and a font family
+- Font sizes are whole points between 6pt and 200pt. By default the picker offers 8, 9, 10, 11 and 12pt; administrators can edit, add or remove sizes
 - Administrators manage the colour list with a colour picker per colour, plus an optional label
-- The size and colour menus tick the entry that matches the selected text
-- **Default size** and **Remove colour** entries return the selection to the default size or colour
+- Administrators manage the font list too: each font has a label and a list of font names (a font stack), such as `Arial, Helvetica, sans-serif`. The defaults are eight web-safe fonts
+- The size, colour and font menus tick the entry that matches the selected text
+- **Default size**, **Remove colour** and **Default font** entries return the selection to the default size, colour or font
 - Every user can also apply a one-off size with **Custom size...** or any colour with **Custom colour...** (a colour picker) in the editor
-- Everything is validated on the server when saved and again before it reaches the editor: only whole-number sizes in range and strict hex colours are accepted, so the settings cannot inject arbitrary CSS
+- Everything is validated on the server when saved and again before it reaches the editor: only whole-number sizes in range, strict hex colours and plain font names are accepted, so the settings cannot inject arbitrary CSS
 - No third-party libraries, external services, or additional Moodle plugins are required - it works on a standard Moodle installation
 
 ## Requirements
@@ -55,18 +56,19 @@ composer require billsensei/moodle-tiny_fontsizecolor
 ## Using the plugin
 
 1. Select some text in the editor.
-2. Click the **Font size** or **Font colour** toolbar button, or open *Format &raquo; Font size* / *Font colour*.
+2. Click the **Font size**, **Font colour** or **Font family** toolbar button, or open *Format &raquo; Font size* / *Font colour* / *Font family*.
 3. Pick an entry from the list. The entry that matches the selected text is ticked.
 
 | Menu entry | What it does |
 | --- | --- |
-| A size or colour from the list | Applies it to the selected text |
-| **Custom size...** | Opens a dialog to enter any whole number of points from 6 to 72 |
+| A size, colour or font from the list | Applies it to the selected text |
+| **Custom size...** | Opens a dialog to enter any whole number of points from 6 to 200 |
 | **Custom colour...** | Opens a colour picker for any colour |
 | **Default size** | Removes any size from the selection, so the text uses the default size again |
 | **Remove colour** | Removes any colour from the selection, so the text uses the default colour again |
+| **Default font** | Removes any font from the selection, so the text uses the default font again |
 
-Sizes are saved as `font-size` and colours as `color` styles on the selected text.
+Sizes are saved as `font-size`, colours as `color` and fonts as `font-family` styles on the selected text. A font only shows for readers who have it installed, otherwise the browser uses the next font in the list, so end each list with a generic family (`serif`, `sans-serif` or `monospace`). The plugin does not load web fonts.
 
 ## Settings
 
@@ -74,19 +76,23 @@ Go to *Site administration &raquo; Plugins &raquo; Text editor &raquo; TinyMCE e
 
 | Setting | Description |
 | --- | --- |
-| Font sizes | The sizes (in points, 6-72) offered in the picker. Default: 8, 9, 10, 11, 12 |
+| Font sizes | The sizes (in points, 6-200) offered in the picker. Default: 8, 9, 10, 11, 12 |
 | Font colours | The colours offered in the picker, each with a colour picker and an optional label |
+| Font families | The fonts offered in the picker, each with a label and up to 10 font names separated by commas. Default: Arial, Verdana, Tahoma, Trebuchet MS, Times New Roman, Georgia, Courier New, Comic Sans MS |
 
-Both settings are shown as editable rows with **Add size** / **Add colour** and **Remove** buttons. Without JavaScript they fall back to a plain text box with one entry per line (`12` for sizes, `#rrggbb|Label` for colours).
+All three settings are shown as editable rows with **Add size** / **Add colour** / **Add font** and **Remove** buttons. Without JavaScript they fall back to a plain text box with one entry per line (`12` for sizes, `#rrggbb|Label` for colours, `Label|Arial, Helvetica, sans-serif` for fonts).
 
 Rules for the lists:
 
-- A size must be a whole number from 6 to 72. At least one size is needed.
+- A size must be a whole number from 6 to 200. At least one size is needed.
 - A colour is a hex value with 3 or 6 digits (`#fff` or `#ffffff`). Each colour can be listed only once.
 - A colour label is optional and at most 50 characters. Without a label the hex value is shown.
+- A font is a list of 1 to 10 font names separated by commas, each up to 50 characters of letters, digits, spaces, `.`, `_` or `-` (names may be wrapped in quotes). The label is optional (the first font name is used) and at most 50 characters. Each font list can be used only once. Names with spaces are saved in single quotes. Brackets, semicolons and anything else that is not a font name are rejected.
 - Invalid entries are rejected with a message when the settings are saved.
 
 The default colours are black, red, orange, green, blue, purple and white.
+
+Upgrading from 1.2.x: the font family list starts with the eight default fonts, and existing size lists are kept. The size limit is now 200, so sizes over 72 can be added to the list or typed with **Custom size...**.
 
 Upgrading from 1.0.x: if the font size list was still the old default (8-18), it is replaced by the new default (8-12). A customised list is kept.
 
@@ -130,6 +136,7 @@ This plugin is a fork of [moodle-tiny_fontsize](https://github.com/finspire-fi/m
 
 ## Changelog
 
+- **1.3.0** - Font family picker (toolbar button, Format menu entry, admin-editable font list with eight web-safe defaults, **Default font** entry). The largest font size is now 200pt (was 72pt).
 - **1.2.5** - Release zip built by GitHub Actions with the single root folder `fontsizecolor`, README install note on which zip to use. `requires` set to Moodle 5.1 (2025100600) to match `supported` [501, 503] and the README. `composer.json` URLs use the renamed repository.
 - **1.2.4** - Added `composer.json` (package `billsensei/moodle-tiny_fontsizecolor`, type `moodle-tiny`) so the plugin can be installed with Composer from Packagist, and a README section on it, including the `public/` path needed on Moodle 5.1 and later. No code changes.
 - **1.2.3** - Fixed the colour list editor in the admin settings: a new colour row with a label but no colour was saved as `|Label` and rejected with an "invalid entries" error. Such a row is now ignored, like an empty size row.

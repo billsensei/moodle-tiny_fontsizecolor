@@ -34,7 +34,7 @@ class fontlist {
     public const MIN_FONTSIZE = 6;
 
     /** @var int Largest font size, in points, that may be offered or applied. */
-    public const MAX_FONTSIZE = 72;
+    public const MAX_FONTSIZE = 200;
 
     /** @var string The unit is fixed because the feature is specified in points. */
     public const FONTSIZEUNIT = 'pt';
@@ -55,6 +55,33 @@ class fontlist {
         '#7e3ff2' => 'color_purple',
         '#ffffff' => 'color_white',
     ];
+
+    /** @var int Maximum number of font names in one font stack. */
+    public const MAX_FONTSTACK_NAMES = 10;
+
+    /** @var int Maximum length of one font name. */
+    public const MAX_FONTNAME_LENGTH = 50;
+
+    /** @var string[] Font families offered until an administrator changes them, as "Label|font stack" lines. */
+    private const DEFAULT_FONTFAMILIES = [
+        'Arial|Arial, Helvetica, sans-serif',
+        'Verdana|Verdana, Geneva, sans-serif',
+        'Tahoma|Tahoma, Geneva, sans-serif',
+        "Trebuchet MS|'Trebuchet MS', Helvetica, sans-serif",
+        "Times New Roman|'Times New Roman', Times, serif",
+        'Georgia|Georgia, serif',
+        "Courier New|'Courier New', Courier, monospace",
+        "Comic Sans MS|'Comic Sans MS', cursive",
+    ];
+
+    /** @var string[] CSS generic family keywords, which must not be quoted. */
+    private const GENERIC_FAMILIES = [
+        'serif', 'sans-serif', 'monospace', 'cursive', 'fantasy', 'system-ui',
+        'ui-serif', 'ui-sans-serif', 'ui-monospace', 'ui-rounded', 'math', 'emoji', 'fangsong',
+    ];
+
+    /** @var string A font name: letters, digits, spaces and a few separators, so no CSS can be smuggled in. */
+    private const FONT_NAME_PATTERN = '/^[\p{L}\p{N}][\p{L}\p{N} _.-]*$/u';
 
     /** @var string Strict 3 or 6 digit hex colour, e.g. #fff or #ffffff. */
     private const HEX_COLOR_PATTERN = '/^#([0-9a-f]{3}|[0-9a-f]{6})$/i';
@@ -79,6 +106,15 @@ class fontlist {
             $lines[] = $value . '|' . get_string($stringid, 'tiny_fontsizecolor');
         }
         return implode("\n", $lines);
+    }
+
+    /**
+     * Default value of the font families setting.
+     *
+     * @return string One "Label|font stack" pair per line.
+     */
+    public static function default_fontfamilies_setting(): string {
+        return implode("\n", self::DEFAULT_FONTFAMILIES);
     }
 
     /**
@@ -125,6 +161,87 @@ class fontlist {
             $value = '#' . $value[1] . $value[1] . $value[2] . $value[2] . $value[3] . $value[3];
         }
         return $value;
+    }
+
+    /**
+     * Parse a font stack, e.g. "Arial, 'Times New Roman', serif", normalising it.
+     *
+     * Only plain font names (optionally in matching quotes) separated by commas are accepted, so a
+     * stack can never contain a semicolon, bracket, url() or any other CSS. Names that are not plain
+     * words are put in single quotes, and generic families such as serif are left bare.
+     *
+     * @param string $value
+     * @return string|null The normalised stack, or null if it is not valid.
+     */
+    public static function parse_fontstack(string $value): ?string {
+        $names = [];
+        foreach (explode(',', $value) as $name) {
+            $name = trim($name);
+            if (preg_match('/^([\'"])(.*)\1$/su', $name, $matches)) {
+                $name = trim($matches[2]);
+            }
+            $name = preg_replace('/\s+/u', ' ', $name);
+            if (
+                $name === '' || core_text::strlen($name) > self::MAX_FONTNAME_LENGTH
+                    || !preg_match(self::FONT_NAME_PATTERN, $name)
+            ) {
+                return null;
+            }
+            if (in_array(strtolower($name), self::GENERIC_FAMILIES, true)) {
+                $name = strtolower($name);
+            } else if (!preg_match('/^[A-Za-z][A-Za-z-]*$/', $name)) {
+                $name = "'" . $name . "'";
+            }
+            $names[] = $name;
+        }
+        if (empty($names) || count($names) > self::MAX_FONTSTACK_NAMES) {
+            return null;
+        }
+        return implode(', ', $names);
+    }
+
+    /**
+     * Parse a font families setting value.
+     *
+     * Each line is "Label|font stack", or just a font stack (the label is then its first font).
+     *
+     * @param string $raw One "Label|font stack" pair per line.
+     * @param string[] $invalid Receives every line that was rejected.
+     * @param string[] $duplicates Receives every line repeating an earlier font stack; the first one is kept.
+     * @return array[] List of ['value' => font stack, 'label' => string], in the configured order.
+     */
+    public static function parse_fontfamilies(string $raw, array &$invalid = [], array &$duplicates = []): array {
+        $invalid = [];
+        $duplicates = [];
+        $families = [];
+        foreach (self::split_lines($raw) as $line) {
+            $parts = explode('|', $line, 2);
+            $label = '';
+            $stackraw = $parts[0];
+            if (count($parts) === 2) {
+                $label = $parts[0];
+                $stackraw = $parts[1];
+            }
+            $value = self::parse_fontstack($stackraw);
+            if ($value === null) {
+                $invalid[] = $line;
+                continue;
+            }
+            $key = strtolower($value);
+            if (isset($families[$key])) {
+                $duplicates[] = $line;
+                continue;
+            }
+
+            $label = clean_param(trim($label), PARAM_NOTAGS);
+            $label = trim(str_replace('|', '', core_text::substr($label, 0, self::MAX_LABEL_LENGTH)));
+            if ($label === '') {
+                $label = trim(explode(',', $value)[0], "'");
+            }
+
+            $families[$key] = ['value' => $value, 'label' => $label];
+        }
+        return array_values($families);
     }
 
     /**
@@ -210,6 +327,16 @@ class fontlist {
     }
 
     /**
+     * Format a list of font families as a setting value.
+     *
+     * @param array[] $families List of ['value' => font stack, 'label' => string].
+     * @return string
+     */
+    public static function format_fontfamilies(array $families): string {
+        return implode("\n", array_map(fn($family) => $family['label'] . '|' . $family['value'], $families));
+    }
+
+    /**
      * The font sizes to offer in the editor.
      *
      * @return int[]
@@ -229,5 +356,16 @@ class fontlist {
         $raw = get_config('tiny_fontsizecolor', 'fontcolors');
         $colors = ($raw === false) ? [] : self::parse_fontcolors($raw);
         return $colors ?: self::parse_fontcolors(self::default_fontcolors_setting());
+    }
+
+    /**
+     * The font families to offer in the editor.
+     *
+     * @return array[] List of ['value' => font stack, 'label' => string].
+     */
+    public static function get_fontfamilies(): array {
+        $raw = get_config('tiny_fontsizecolor', 'fontfamilies');
+        $families = ($raw === false) ? [] : self::parse_fontfamilies($raw);
+        return $families ?: self::parse_fontfamilies(self::default_fontfamilies_setting());
     }
 }

@@ -22,7 +22,7 @@
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-import {getFontColorList, getFontSizeList, getFontSizeMax, getFontSizeMin, getFontSizeUnit} from './options';
+import {getFontColorList, getFontFamilyList, getFontSizeList, getFontSizeMax, getFontSizeMin, getFontSizeUnit} from './options';
 import {getButtonImage} from 'editor_tiny/utils';
 // The snake_case exports are used because getString/getStrings only exist from Moodle 4.3.
 import {get_string as getString, get_strings as getStrings} from 'core/str';
@@ -32,6 +32,9 @@ import {
     fontcolorButtonName,
     fontcolorIcon,
     fontcolorMenuItemName,
+    fontfamilyButtonName,
+    fontfamilyIcon,
+    fontfamilyMenuItemName,
     fontsizeButtonName,
     fontsizeIcon,
     fontsizeMenuItemName,
@@ -48,6 +51,15 @@ const FALLBACK_COLOR = '#000000';
 // TinyMCE's own "fontsize" format only removes a size that matches the value given, so this
 // format (registered per editor) has remove_similar to remove any size from the selection.
 const FONTSIZE_RESET_FORMAT = 'tiny_fontsizecolor_fontsize_reset';
+
+// TinyMCE's own "fontname" format only removes a font that matches the value given, so this
+// format (registered per editor) has remove_similar to remove any font from the selection.
+const FONTFAMILY_RESET_FORMAT = 'tiny_fontsizecolor_fontfamily_reset';
+
+// A font stack as normalised by classes/local/fontlist.php: plain names, or names in single
+// quotes, separated by commas. Anything else is refused rather than passed to the inline style.
+const FONT_NAME = "(?:[A-Za-z][A-Za-z-]*|'[\\p{L}\\p{N}][\\p{L}\\p{N} _.-]*')";
+const FONT_STACK_PATTERN = new RegExp(`^${FONT_NAME}(?:, ${FONT_NAME})*$`, 'u');
 
 /**
  * Parse a font size, accepting only whole numbers within the configured range.
@@ -95,6 +107,19 @@ const parseColor = (value) => {
 };
 
 /**
+ * Check a font stack, e.g. "'Times New Roman', Times, serif".
+ *
+ * @param {string} value
+ * @returns {string|null} The stack, or null if it is not a plain list of font names.
+ */
+const parseFontStack = (value) => {
+    if (typeof value !== 'string' || !FONT_STACK_PATTERN.test(value)) {
+        return null;
+    }
+    return value;
+};
+
+/**
  * Apply a font size to the current selection.
  *
  * @param {TinyMCE.editor} editor The tinyMCE editor instance.
@@ -129,6 +154,53 @@ const handleFontColorAction = (editor, color) => {
         editor.nodeChanged();
     });
 };
+
+/**
+ * Apply a font family to the current selection.
+ *
+ * @param {TinyMCE.editor} editor The tinyMCE editor instance.
+ * @param {string} fontstack CSS font stack, e.g. "Arial, Helvetica, sans-serif".
+ */
+const handleFontFamilyAction = (editor, fontstack) => {
+    const value = parseFontStack(fontstack);
+    if (value === null) {
+        return;
+    }
+    editor.undoManager.transact(() => {
+        editor.focus();
+        editor.formatter.apply('fontname', {value});
+        editor.nodeChanged();
+    });
+};
+
+/**
+ * Remove the font family from the current selection, returning it to the default font.
+ *
+ * @param {TinyMCE.editor} editor The tinyMCE editor instance.
+ */
+const handleResetFontFamilyAction = (editor) => {
+    editor.undoManager.transact(() => {
+        editor.focus();
+        editor.formatter.remove(FONTFAMILY_RESET_FORMAT);
+        editor.nodeChanged();
+    });
+};
+
+/**
+ * The first font name of a font stack, lower case and without quotes, for comparing fonts.
+ *
+ * @param {string} stack
+ * @returns {string}
+ */
+const firstFontName = (stack) => String(stack).split(',')[0].replace(/["']/g, '').trim().toLowerCase();
+
+/**
+ * The first font name of the selection's font.
+ *
+ * @param {TinyMCE.editor} editor The tinyMCE editor instance.
+ * @returns {string} Lower case name, or an empty string.
+ */
+const getCurrentFontName = (editor) => firstFontName(editor.queryCommandValue('FontName') || '');
 
 /**
  * Remove the font size from the current selection, returning it to the default size.
@@ -291,35 +363,43 @@ export const getSetup = async() => {
             fontsizeMenuItemNameTitle,
             fontcolorButtonNameTitle,
             fontcolorMenuItemNameTitle,
+            fontfamilyButtonNameTitle,
+            fontfamilyMenuItemNameTitle,
             customSizeText,
             customSizeTitle,
             customColorText,
             customColorTitle,
             resetSizeText,
             resetColorText,
+            resetFontText,
             cancelText,
             saveText,
         ],
         fontsizeButtonImage,
         fontcolorButtonImage,
+        fontfamilyButtonImage,
     ] = await Promise.all([
         getStrings([
             'button_fontsize',
             'menuitem_fontsize',
             'button_fontcolor',
             'menuitem_fontcolor',
+            'button_fontfamily',
+            'menuitem_fontfamily',
             'customsize',
             'customsize_title',
             'customcolor',
             'customcolor_title',
             'resetsize',
             'resetcolor',
+            'resetfont',
         ].map((key) => ({key, component})).concat([
             {key: 'cancel', component: 'core'},
             {key: 'savechanges', component: 'core'},
         ])),
         getButtonImage(fontsizeIcon, component),
         getButtonImage(fontcolorIcon, component),
+        getButtonImage(fontfamilyIcon, component),
     ]);
 
     return (editor) => {
@@ -342,11 +422,18 @@ export const getSetup = async() => {
                 'remove_similar': true,
                 'clear_child_styles': true,
             });
+            editor.formatter.register(FONTFAMILY_RESET_FORMAT, {
+                inline: 'span',
+                styles: {fontFamily: '%value'},
+                'remove_similar': true,
+                'clear_child_styles': true,
+            });
         });
 
         // Register the Moodle SVG icons as icons suitable for use as TinyMCE toolbar buttons.
         editor.ui.registry.addIcon(fontsizeIcon, fontsizeButtonImage.html);
         editor.ui.registry.addIcon(fontcolorIcon, fontcolorButtonImage.html);
+        editor.ui.registry.addIcon(fontfamilyIcon, fontfamilyButtonImage.html);
 
         // Font size: button, menu item, and their shared submenu.
         const unit = getFontSizeUnit(editor);
@@ -434,6 +521,42 @@ export const getSetup = async() => {
             icon: fontcolorIcon,
             tooltip: fontcolorButtonNameTitle,
             fetch: (callback) => callback(getFontColorSubmenuItems()),
+        });
+
+        // Font family: button, menu item, and their shared submenu.
+        const fontFamilyList = getFontFamilyList(editor)
+            .map((entry) => ({value: parseFontStack(entry?.value), label: String(entry?.label ?? '')}))
+            .filter((entry) => entry.value !== null);
+
+        const getFontFamilySubmenuItems = () => {
+            const current = getCurrentFontName(editor);
+            const items = fontFamilyList.map((entry) => ({
+                type: 'togglemenuitem',
+                text: entry.label,
+                active: current !== '' && firstFontName(entry.value) === current,
+                onAction: () => handleFontFamilyAction(editor, entry.value),
+            }));
+            if (items.length) {
+                items.push({type: 'separator'});
+            }
+            items.push({
+                type: 'menuitem',
+                text: resetFontText,
+                onAction: () => handleResetFontFamilyAction(editor),
+            });
+            return items;
+        };
+
+        editor.ui.registry.addNestedMenuItem(fontfamilyMenuItemName, {
+            icon: fontfamilyIcon,
+            text: fontfamilyMenuItemNameTitle,
+            getSubmenuItems: getFontFamilySubmenuItems,
+        });
+
+        editor.ui.registry.addMenuButton(fontfamilyButtonName, {
+            icon: fontfamilyIcon,
+            tooltip: fontfamilyButtonNameTitle,
+            fetch: (callback) => callback(getFontFamilySubmenuItems()),
         });
     };
 };
