@@ -155,7 +155,7 @@ final class fontlist_test extends \advanced_testcase {
         $this->assertSame([8, 9, 10, 11, 12], fontlist::get_fontsizes());
         $this->assertCount(7, fontlist::get_fontcolors());
 
-        set_config('fontsizes', "99\nabc", 'tiny_fontsizecolor');
+        set_config('fontsizes', "201\nabc", 'tiny_fontsizecolor');
         set_config('fontcolors', 'nope', 'tiny_fontsizecolor');
         $this->assertSame([8, 9, 10, 11, 12], fontlist::get_fontsizes());
         $this->assertSame(['value' => '#000000', 'label' => 'Black'], fontlist::get_fontcolors()[0]);

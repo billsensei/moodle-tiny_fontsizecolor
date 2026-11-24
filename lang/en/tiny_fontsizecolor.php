@@ -25,8 +25,8 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$string['addfont'] = 'Add font';
 $string['addcolor'] = 'Add colour';
+$string['addfont'] = 'Add font';
 $string['addsize'] = 'Add size';
 $string['button_fontcolor'] = 'Font colour';
 $string['button_fontfamily'] = 'Font family';
@@ -38,8 +38,6 @@ $string['color_orange'] = 'Orange';
 $string['color_purple'] = 'Purple';
 $string['color_red'] = 'Red';
 $string['color_white'] = 'White';
-$string['fontlabel'] = 'Label of font {$a}';
-$string['fontstack'] = 'Font names of font {$a}, separated by commas';
 $string['colorhex'] = 'Hex value of colour {$a}';
 $string['colorlabel'] = 'Label of colour {$a}';
 $string['colorpicker'] = 'Colour {$a}';
@@ -52,14 +50,16 @@ $string['customsize_title'] = 'Custom font size';
 $string['error_duplicates'] = 'Each entry can only be listed once. Change or remove: {$a}';
 $string['error_empty'] = 'Add at least one entry.';
 $string['error_invalidentries'] = 'These entries are not valid: {$a}';
-$string['fontfamilies'] = 'Font families';
-$string['fontfamilies_desc'] = 'The fonts offered in the editor. Give each a label, and a list of up to {$a} font names separated by commas, such as "Arial, Helvetica, sans-serif": the browser uses the first font that is installed on the reader\'s device, so end the list with a generic family (serif, sans-serif or monospace). Only plain font names are accepted.';
 $string['fontcolors'] = 'Font colours';
 $string['fontcolors_desc'] = 'The colours offered in the editor. Use the colour picker to change a colour, or "Add colour" to add one. Every user can also pick any other colour with "Custom colour..." in the editor.';
+$string['fontfamilies'] = 'Font families';
+$string['fontfamilies_desc'] = 'The fonts offered in the editor. Give each a label, and a list of up to {$a} font names separated by commas, such as "Arial, Helvetica, sans-serif": the browser uses the first font that is installed on the reader\'s device, so end the list with a generic family (serif, sans-serif or monospace). Only plain font names are accepted.';
+$string['fontlabel'] = 'Label of font {$a}';
 $string['fontsize'] = 'Font size {$a} in points';
 $string['fontsizecolor:use'] = 'Use the font size and colour tool in the editor';
 $string['fontsizes'] = 'Font sizes';
 $string['fontsizes_desc'] = 'The font sizes, in points, offered in the editor. Each must be a whole number between {$a->min} and {$a->max}. Every user can also enter any other size in that range with "Custom size..." in the editor.';
+$string['fontstack'] = 'Font names of font {$a}, separated by commas';
 $string['menuitem_fontcolor'] = 'Font colour';
 $string['menuitem_fontfamily'] = 'Font family';
 $string['menuitem_fontsize'] = 'Font size';
